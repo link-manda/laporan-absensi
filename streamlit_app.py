@@ -28,7 +28,7 @@ def strip_data_validations(excel_path):
                 zout.writestr(item, content)
     shutil.move(temp_path, excel_path)
 
-def generate_excel_file(df, template_excel, file_output, nama_pegawai, opd, projek, role):
+def generate_excel_file(df, template_excel, file_output, nama_pegawai, opd, projek, role, format_durasi="Lengkap"):
     data_saya = df[df['nama'].str.lower() == nama_pegawai.lower()]
 
     if data_saya.empty:
@@ -67,7 +67,13 @@ def generate_excel_file(df, template_excel, file_output, nama_pegawai, opd, proj
                         selisih = waktu_pulang - waktu_masuk
                         jam = selisih.seconds // 3600
                         menit = (selisih.seconds // 60) % 60
-                        durasi_kerja = f'{jam} jam {menit} menit'
+                        
+                        if format_durasi == "Ringkas":
+                            jam_ringkas = max(8, jam)
+                            durasi_kerja = str(jam_ringkas)
+                        else:
+                            durasi_kerja = f'{jam} jam {menit} menit'
+                            
                         keterangan = 'Hadir'
                     else:
                         jam_masuk = str(absen).strip()
@@ -205,6 +211,11 @@ if uploaded_file is not None:
                 projek = st.text_input("4. Nama Projek", value="Open SID (Sistem Informasi Desa) Kab. Badung")
                 role = st.text_input("5. Role", value="Full Stack Web Developer")
             
+            # Format Durasi
+            st.write("6. Pengaturan Laporan")
+            format_durasi = st.radio("Format Durasi Kerja", ["Lengkap (Misal: 9 jam 15 menit)", "Ringkas (Hanya Angka Jam, Minimal 8)"])
+            format_internal = "Ringkas" if "Ringkas" in format_durasi else "Lengkap"
+            
             # Tombol Eksekusi
             if st.button("🚀 Generate Laporan Excel", type="primary", use_container_width=True):
                 with st.spinner("Sedang memproses laporan..."):
@@ -219,7 +230,8 @@ if uploaded_file is not None:
                             nama_pegawai=nama_pegawai,
                             opd=opd,
                             projek=projek,
-                            role=role
+                            role=role,
+                            format_durasi=format_internal
                         )
                         
                         if success:
