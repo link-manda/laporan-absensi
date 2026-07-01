@@ -42,6 +42,8 @@ def generate_excel_file(df, template_excel, file_output, nama_pegawai, opd, proj
         tanggal_str_bersih = str(tanggal_str).strip()
         
         try:
+            # Standarisasi format tanggal (ubah / menjadi -)
+            tanggal_str_bersih = tanggal_str_bersih.replace('/', '-')
             tanggal_obj = datetime.strptime(tanggal_str_bersih, '%d-%m-%Y')
             nama_hari = tanggal_obj.strftime('%A')
             tanggal_format_baru = tanggal_obj.strftime('%Y-%m-%d')
@@ -62,6 +64,8 @@ def generate_excel_file(df, template_excel, file_output, nama_pegawai, opd, proj
                 try:
                     if ' - ' in str(absen):
                         jam_masuk, jam_pulang = str(absen).split(' - ')
+                        jam_masuk = jam_masuk.replace('.', ':').strip()
+                        jam_pulang = jam_pulang.replace('.', ':').strip()
                         waktu_masuk = datetime.strptime(jam_masuk, '%H:%M:%S')
                         waktu_pulang = datetime.strptime(jam_pulang, '%H:%M:%S')
                         selisih = waktu_pulang - waktu_masuk
