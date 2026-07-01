@@ -119,7 +119,7 @@ def generate_excel_file(df, template_excel, file_output, nama_pegawai, opd, proj
         try:
             first_date_obj = datetime.strptime(first_date_str, '%d-%m-%Y')
             month_year_str = first_date_obj.strftime("%m/%y")
-            ws.cell(row=5, column=7).value = f"'{month_year_str}"
+            ws.cell(row=5, column=7).value = month_year_str
         except ValueError:
             pass
 
@@ -209,8 +209,8 @@ def generate_excel_file(df, template_excel, file_output, nama_pegawai, opd, proj
             val = ws.cell(row=r, column=2).value
             if val and 'Tanggal' in str(val):
                 tanggal_str = ttd_date.strftime("%d/%m/%Y")
-                ws.cell(row=r, column=3).value = f"'{tanggal_str}"
-                ws.cell(row=r, column=6).value = f"'{tanggal_str}"
+                ws.cell(row=r, column=3).value = tanggal_str
+                ws.cell(row=r, column=6).value = tanggal_str
             if val and 'Nama' in str(val):
                 ws.cell(row=r, column=3).value = nama_pegawai
 
