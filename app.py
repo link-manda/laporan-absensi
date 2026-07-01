@@ -114,7 +114,7 @@ def generate_laporan(df, template_excel, file_output, nama_pegawai, opd, projek,
     red_font = Font(name='Arial', size=11, bold=False, color="FF0000")
     left_align = Alignment(horizontal='left')
 
-    for r in range(11, 45):
+    for r in range(11, 42):
         for c in range(2, 7):
             ws.cell(row=r, column=c).value = None
             ws.cell(row=r, column=c).border = Border()
@@ -142,7 +142,7 @@ def generate_laporan(df, template_excel, file_output, nama_pegawai, opd, projek,
     last_data_row = baris_sekarang - 1
     
     nama_row = None
-    for r in range(last_data_row, last_data_row + 20):
+    for r in range(last_data_row, 60):
         val = ws.cell(row=r, column=2).value
         if val and 'Nama' in str(val):
             nama_row = r
@@ -154,7 +154,19 @@ def generate_laporan(df, template_excel, file_output, nama_pegawai, opd, projek,
         
         selisih = target_signature_start - signature_start
         if selisih != 0:
-            ws.move_range(f"A{signature_start}:H{signature_start + 15}", rows=selisih, cols=0)
+            merged_offsets = []
+            merged_cells_to_remove = []
+            for mc in ws.merged_cells.ranges:
+                if mc.min_row >= signature_start and mc.max_row <= signature_start + 15:
+                    merged_offsets.append((mc.min_row - signature_start, mc.min_col, mc.max_row - signature_start, mc.max_col))
+                    merged_cells_to_remove.append(mc)
+            for mc in merged_cells_to_remove:
+                ws.merged_cells.remove(mc)
+
+            ws.move_range(f"A{signature_start}:H{signature_start + 10}", rows=selisih, cols=0)
+
+            for r_min, c_min, r_max, c_max in merged_offsets:
+                ws.merge_cells(start_row=target_signature_start + r_min, start_column=c_min, end_row=target_signature_start + r_max, end_column=c_max)
 
         for r in range(last_data_row + 1, target_signature_start):
             for c in range(1, 8):
@@ -162,12 +174,25 @@ def generate_laporan(df, template_excel, file_output, nama_pegawai, opd, projek,
                 ws.cell(row=r, column=c).border = Border()
                 ws.cell(row=r, column=c).fill = openpyxl.styles.PatternFill(fill_type=None)
                 
+        # Fix row heights manually for the signature block
+        ws.row_dimensions[target_signature_start].height = 20.25      # Tenaga Ahli
+        ws.row_dimensions[target_signature_start + 1].height = 21.75  # Nama
+        ws.row_dimensions[target_signature_start + 2].height = 47.25  # Ttd
+        ws.row_dimensions[target_signature_start + 3].height = 20.25  # Space
+        ws.row_dimensions[target_signature_start + 4].height = 20.25  # Space
+        ws.row_dimensions[target_signature_start + 5].height = 20.25  # Tanggal
+        
+        if selisih != 0:
+            for r in range(target_signature_start + 6, 60):
+                ws.row_dimensions[r].height = 20.25
+                
         # Update Tanggal Tanda Tangan & Nama
-        for r in range(target_signature_start, target_signature_start + 15):
+        for r in range(target_signature_start, target_signature_start + 10):
             val = ws.cell(row=r, column=2).value
             if val and 'Tanggal' in str(val):
-                ws.cell(row=r, column=3).value = ttd_date
-                ws.cell(row=r, column=6).value = ttd_date
+                tanggal_str = ttd_date.strftime("%d/%m/%Y")
+                ws.cell(row=r, column=3).value = f"'{tanggal_str}"
+                ws.cell(row=r, column=6).value = f"'{tanggal_str}"
             if val and 'Nama' in str(val):
                 ws.cell(row=r, column=3).value = nama_pegawai
 
