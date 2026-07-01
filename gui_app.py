@@ -101,6 +101,16 @@ def generate_laporan(file_csv, template_excel, file_output, nama_pegawai, opd, p
     ws.cell(row=7, column=6, value=nama_pegawai)
     ws.cell(row=8, column=3, value=projek)
     ws.cell(row=8, column=6, value=role)
+    
+    # Update Bulan/Tahun di Pojok Kanan Atas (Row 5, Col 7)
+    if len(kolom_tanggal) > 0:
+        first_date_str = str(kolom_tanggal[0]).strip().replace('/', '-')
+        try:
+            first_date_obj = datetime.strptime(first_date_str, '%d-%m-%Y')
+            month_year_str = first_date_obj.strftime("%m/%y")
+            ws.cell(row=5, column=7).value = f"'{month_year_str}"
+        except ValueError:
+            pass
 
     thin_border = Border(left=Side(style='thin'), 
                          right=Side(style='thin'), 
